@@ -38,7 +38,7 @@ st.markdown("""
 st.title("🏎️ FORMULA 1 DRIVE TO SURVIVE") # ⭐ 이름 변경
 st.caption("F1 입문자라면 넷플릭스 FORMULA 1 DRIVE TO SURVIVE로 시작하는 걸 추천해요! (DTS 기반 큐레이터)") # ⭐ 캡션 수정
 st.image(
-    "https://placehold.co/1200x300/FF1801/ffffff?text=F1+DRIVE+TO+SURVIVE",
+    "https://cdn.mania.kr/dvdprime/file/2508/comm_30058401_20250812113848_c531f62a22b6b3f7.jpg",
     caption="F1 입문을 환영합니다!",
     use_column_width=True
 )
@@ -245,4 +245,5 @@ if prompt := st.chat_input("DTS에 대해 무엇이든 물어보세요!"):
             
         # ⭐⭐⭐ 버그 수정: 최종 답변 저장 코드를 if/else 바깥에서 단 한 번 실행
         st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+
 
