@@ -109,7 +109,7 @@ if prompt := st.chat_input("F1에 대해 무엇이든 물어보세요!"):
             model="gpt-4o-mini", # <<<< ⭐ 배포명으로 수정 필수!
             messages=messages_for_api,
             tools=TOOLS,             
-            tool_choice="auto",      
+            tool_choice={"type": "function", "function": {"name": "search_web"}},    
             temperature=temperature,
         )
 
