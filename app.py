@@ -36,7 +36,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🏎️ FORMULA 1 DRIVE TO SURVIVE") # ⭐ 이름 변경
-st.caption("F1 본능의 질주 입문 가이드. Function Calling 기술 활용 (검색 대상: DTS 문서)") # ⭐ 캡션 변경
+st.caption("F1 입문자라면 넷플릭스 FORMULA 1 DRIVE TO SURVIVE로 시작하는 걸 추천해요! (DTS 기반 큐레이터)") # ⭐ 캡션 수정
 st.divider()
 
 # 2. Azure OpenAI 클라이언트 설정 
@@ -97,7 +97,7 @@ with st.sidebar:
         temperature = st.slider("창의성 (Temperature)", 0.0, 1.0, 0.7, 0.1)
         system_prompt = st.text_area(
             "시스템 프롬프트",
-            "너는 'F1 본능의 질주' 전문 큐레이터 챗봇이야. F1 입문자를 돕는 것이 목표이며, 사용자의 질문이 **DTS 문서 검색이 필요한 내용(예: 배경지식, 드라이버 비화)**이라고 판단되면 **Tool을 사용하고**, 일반적인 F1 정보(예: 엔진 규정)는 자체 지식으로 답변해.", # ⭐ '민수' 제거
+            "너는 'F1 본능의 질주' 전문 큐레이터 챗봇이야. F1 입문자를 돕는 것이 목표이며, 사용자의 질문이 **DTS 문서 검색이 필요한 내용(예: 배경지식, 드라이버 비화)**이라고 판단되면 **Tool을 사용하고**, 일반적인 F1 정보(예: 엔진 규정)는 자체 지식으로 답변해.", 
             height=150,
         )
 
@@ -134,7 +134,7 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("💡 프로젝트 정보")
     st.markdown("""
-        **콘셉트:** FORMULA 1 DRIVE TO SURVIVE 입문자 가이드 # ⭐ 콘셉트 이름 변경
+        **콘셉트:** FORMULA 1 DRIVE TO SURVIVE 입문자 가이드
         
         **활용 기술:** Function Calling (Tool-Use) 기반 RAG
     """)
