@@ -1,3 +1,4 @@
+# streamlit 사용해서 배포하기
 import streamlit as st
 import os
 from openai import AzureOpenAI
@@ -5,9 +6,31 @@ from dotenv import load_dotenv
  
 # 1. 환경 변수 로드 (.env 파일이 같은 폴더에 있어야 함)
 load_dotenv()
- 
-st.title("🤖 나의 첫 AI 챗봇")
- 
+
+st.set_page_config(
+    page_title="주현이의 첫 AI 챗봇",
+    page_icon="🤖",
+    layout="wide",  # 넓게 쓰고 싶으면 wide, 기본은 centered
+)
+
+st.title("주현이의 첫 AI 챗봇")
+st.caption("Azure OpenAI + Streamlit으로 만든 간단한 챗봇입니다.")
+st.divider()
+
+# 사이드바
+# 2. 사이드바
+with st.sidebar:
+    st.header("⚙️ 설정")
+    temperature = st.slider("창의성 (temperature)", 0.0, 1.0, 0.7, 0.1)
+    system_prompt = st.text_area(
+        "시스템 프롬프트",
+        "너는 친절한 AI 챗봇이야. 사용자의 질문에 한국어로 대답해줘.",
+        height=120,
+    )
+    st.markdown("---")
+    st.markdown("**Made with 💙 Streamlit + Azure OpenAI**")
+
+
 # 2. Azure OpenAI 클라이언트 설정
 # (실제 값은 .env 파일이나 여기에 직접 입력하세요)
 client = AzureOpenAI(
