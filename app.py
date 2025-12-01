@@ -12,6 +12,39 @@ st.set_page_config(
     page_icon="🏎️",
     layout="wide",
 )
+st.markdown("""
+<style>
+/* -------------------------------------- */
+/* 1. 메인 타이틀 아래 캡션 스타일 (Tool-Use 설명 부분) */
+.stApp header {
+    background-color: transparent !important;
+}
+
+/* 2. 챗봇 답변 (Assistant) 메시지 스타일링 */
+/* 이 클래스는 Streamlit의 챗봇 메시지(블록) 전체를 감싸는 컨테이너입니다. */
+/* LLM의 답변 블록 왼쪽에 F1 컨셉 색상 (빨강) 선을 추가하여 '전문성'을 강조합니다. */
+.st-emotion-cache-1jm6hrf { 
+    border-left: 5px solid #FF1801; /* F1 컨셉 레드 (페라리 색상 참고) */
+    padding: 15px 15px 15px 20px; /* 왼쪽 패딩을 더 줘서 선이 잘 보이도록 */
+    border-radius: 0 8px 8px 0; /* 왼쪽 선을 강조하기 위해 오른쪽만 둥글게 */
+}
+
+/* 3. 사용자 질문 (User) 메시지 스타일링 */
+/* 사용자 질문 블록 전체에 은은한 배경색을 추가하여 가독성을 높입니다. */
+.st-emotion-cache-1c9v60l {
+    background-color: #f7f7f7; /* 아주 연한 회색 */
+    border-radius: 8px;
+}
+
+/* 4. Streamlit 기본 위젯 (버튼 등)의 색상 변경 - 선택 사항 */
+/*
+div.stButton > button:first-child {
+    background-color: #00D2BE; 
+    color: white;
+}
+*/
+</style>
+""", unsafe_allow_html=True)
 st.title("🏎️ F1 본능의 질주 입문 가이드")
 st.caption("수업에서 배운 Function Calling 기술을 활용합니다. (검색 대상: DTS 문서)")
 st.divider()
@@ -175,4 +208,5 @@ if prompt := st.chat_input("DTS에 대해 무엇이든 물어보세요!"):
             # 최종 답변 화면에 출력 & 저장
             message_placeholder.markdown(assistant_reply)
             st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+
 
