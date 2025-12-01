@@ -155,8 +155,24 @@ if prompt := st.chat_input("DTS에 대해 무엇이든 물어보세요!"):
             
             # ⭐ 2차 호출: Tool 실행 결과를 LLM에게 전달하여 최종 답변 생성
             message_placeholder.markdown("✨ **DTS 문서 검색 완료!** 민수가 쉽게 이해할 수 있도록 답변을 정리하고 있어요... 🤖")
-            response = client.chat.completions.create(
-                model="gpt-4o-mini", # <<<< ⭐ 배포명으로 수정 필수!
-                messages=messages_for_api, # Tool 실행 결과가 추가된 메시지 전달
-                temperature=temperature,
-            )
+
+            try:
+                # 2차 호출 시도
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini", # <<<< ⭐ 배포명으로 수정 필수!
+                    messages=messages_for_api, # Tool 실행 결과가 추가된 메시지 전달
+                    temperature=temperature,
+                )
+    
+                # 응답이 성공적으로 왔을 때
+                assistant_reply = response.choices[0].message.content
+    
+            except Exception as e:
+                # API 호출 중 오류(Error)가 발생하면 이 부분이 실행됨
+                st.error(f"🚨 2차 API 호출 중 치명적인 오류 발생: {e}")
+                assistant_reply = f"죄송합니다. 서버 문제로 답변을 생성하지 못했습니다. (오류 코드: {str(e)[:50]}...)"
+    
+            # 최종 답변 화면에 출력 & 저장
+            message_placeholder.markdown(assistant_reply)
+            st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+
