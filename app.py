@@ -102,17 +102,32 @@ AVAILABLE_FUNCTIONS = {
 }
 # -----------------------------------------------------
 
-# 사이드바 설정
+# 사이드바 설정 (UI 개선 적용)
 with st.sidebar:
-    st.header("⚙️ 설정")
-    temperature = st.slider("창의성 (temperature)", 0.0, 1.0, 0.7, 0.1)
-    system_prompt = st.text_area(
-        "시스템 프롬프트",
-        "너는 'F1 본능의 질주' 전문 큐레이터 챗봇이야. F1 입문자 민수를 돕는 것이 목표이며, 사용자의 질문에 대해 **반드시** Tool을 사용해서 관련 DTS 문서의 내용을 찾아온 뒤, 이를 바탕으로 **흥미롭고 쉽게** 답변해줘야 해.",
-        height=150,
-    )
+    st.header("⚙️ F1 DTS 챗봇 설정")
     st.markdown("---")
-    st.markdown("**Made with 💙 Streamlit + Azure OpenAI**")
+    
+    # Expander를 사용해 LLM 옵션을 접어두기
+    with st.expander("✨ LLM 개발자 옵션 변경", expanded=False): 
+        # temperature와 system_prompt 변수는 이 블록 안에서 정의되어야 함
+        temperature = st.slider("창의성 (Temperature)", 0.0, 1.0, 0.7, 0.1)
+        system_prompt = st.text_area(
+            "시스템 프롬프트",
+            "너는 'F1 본능의 질주' 전문 큐레이터 챗봇이야. F1 입문자 민수를 돕는 것이 목표이며, 사용자의 질문에 대해 **반드시** Tool을 사용해서 관련 DTS 문서의 내용을 찾아온 뒤, 이를 바탕으로 **흥미롭고 쉽게** 답변해줘야 해.",
+            height=150,
+        )
+    
+    # 챗봇 정보
+    st.markdown("---")
+    st.subheader("💡 프로젝트 정보")
+    st.markdown("""
+        **콘셉트:** F1 DTS (본능의 질주) 입문자 가이드
+        
+        **활용 기술:** Function Calling (Tool-Use) 기반 RAG
+    """)
+
+    st.markdown("---")
+    st.markdown("Made with 💙 Streamlit + Azure OpenAI")
 
 # 대화기록(Session State) 초기화
 if "messages" not in st.session_state:
@@ -208,5 +223,6 @@ if prompt := st.chat_input("DTS에 대해 무엇이든 물어보세요!"):
             # 최종 답변 화면에 출력 & 저장
             message_placeholder.markdown(assistant_reply)
             st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+
 
 
