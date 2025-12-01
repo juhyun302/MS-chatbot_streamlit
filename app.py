@@ -15,36 +15,26 @@ st.set_page_config(
 st.markdown("""
 <style>
 /* -------------------------------------- */
-/* 1. 메인 타이틀 아래 캡션 스타일 (Tool-Use 설명 부분) */
+/* 1. Streamlit 기본 헤더 투명화 */
 .stApp header {
     background-color: transparent !important;
 }
 
 /* 2. 챗봇 답변 (Assistant) 메시지 스타일링 */
-/* 이 클래스는 Streamlit의 챗봇 메시지(블록) 전체를 감싸는 컨테이너입니다. */
-/* LLM의 답변 블록 왼쪽에 F1 컨셉 색상 (빨강) 선을 추가하여 '전문성'을 강조합니다. */
 .st-emotion-cache-1jm6hrf { 
-    border-left: 5px solid #FF1801; /* F1 컨셉 레드 (페라리 색상 참고) */
-    padding: 15px 15px 15px 20px; /* 왼쪽 패딩을 더 줘서 선이 잘 보이도록 */
-    border-radius: 0 8px 8px 0; /* 왼쪽 선을 강조하기 위해 오른쪽만 둥글게 */
+    border-left: 5px solid #FF1801; /* F1 컨셉 레드 */
+    padding: 15px 15px 15px 20px; 
+    border-radius: 0 8px 8px 0; 
 }
 
 /* 3. 사용자 질문 (User) 메시지 스타일링 */
-/* 사용자 질문 블록 전체에 은은한 배경색을 추가하여 가독성을 높입니다. */
 .st-emotion-cache-1c9v60l {
-    background-color: #f7f7f7; /* 아주 연한 회색 */
+    background-color: #f7f7f7; 
     border-radius: 8px;
 }
-
-/* 4. Streamlit 기본 위젯 (버튼 등)의 색상 변경 - 선택 사항 */
-/*
-div.stButton > button:first-child {
-    background-color: #00D2BE; 
-    color: white;
-}
-*/
 </style>
 """, unsafe_allow_html=True)
+
 st.title("🏎️ F1 본능의 질주 입문 가이드")
 st.caption("수업에서 배운 Function Calling 기술을 활용합니다. (검색 대상: DTS 문서)")
 st.divider()
@@ -59,13 +49,10 @@ client = AzureOpenAI(
 # -----------------------------------------------------
 # ⭐ Tool-Use (Function Calling) 정의 영역 ⭐
 # -----------------------------------------------------
-
-# 1. Tool 역할을 할 함수 정의 (DTS 문서 검색 더미 데이터 사용)
 def search_dts_knowledge(query: str) -> str:
     """
     사용자의 질문과 관련된 'F1 본능의 질주'의 시즌/에피소드별 핵심 내용, 드라이버 이야기, 팀 전략 문서를 찾아 반환합니다.
     """
-    # 실제 RAG 시스템이 문서에서 찾은 내용을 반환한다고 가정
     if "다니엘 리카르도" in query or "르노" in query:
         return "문서 검색 결과: 다니엘 리카르도의 레드불 이적 결정과 르노에서의 새로운 시작은 '본능의 질주' S1의 주요 주제 중 하나입니다. 그의 이적 배경과 심경 변화가 잘 다뤄집니다."
     elif "하스" in query or "슈타이너" in query:
@@ -75,7 +62,6 @@ def search_dts_knowledge(query: str) -> str:
     else:
         return f"문서 검색 결과: '{query}'에 대한 '본능의 질주' 관련 요약 정보를 찾았습니다. 이는 F1의 복잡한 배경 지식을 쉽게 이해하는 데 도움이 될 것입니다."
 
-# 2. LLM에게 전달할 Tool Schema 정의
 TOOLS = [
     {
         "type": "function",
@@ -96,24 +82,22 @@ TOOLS = [
     }
 ]
 
-# 3. 함수 이름과 실제 함수를 연결
 AVAILABLE_FUNCTIONS = {
     "search_dts_knowledge": search_dts_knowledge,
 }
 # -----------------------------------------------------
 
-# 사이드바 설정 (UI 개선 적용)
+# 사이드바 설정
 with st.sidebar:
     st.header("⚙️ F1 DTS 챗봇 설정")
     st.markdown("---")
     
-    # Expander를 사용해 LLM 옵션을 접어두기
+    # Expander를 사용해 LLM 옵션을 접어두기 (UI 최적화)
     with st.expander("✨ LLM 개발자 옵션 변경", expanded=False): 
-        # temperature와 system_prompt 변수는 이 블록 안에서 정의되어야 함
         temperature = st.slider("창의성 (Temperature)", 0.0, 1.0, 0.7, 0.1)
         system_prompt = st.text_area(
             "시스템 프롬프트",
-            "너는 'F1 본능의 질주' 전문 큐레이터 챗봇이야. F1 입문자 민수를 돕는 것이 목표이며, 사용자의 질문에 대해 **반드시** Tool을 사용해서 관련 DTS 문서의 내용을 찾아온 뒤, 이를 바탕으로 **흥미롭고 쉽게** 답변해줘야 해.",
+            "너는 'F1 본능의 질주' 전문 큐레이터 챗봇이야. F1 입문자 민수를 돕는 것이 목표이며, 사용자의 질문이 **DTS 문서 검색이 필요한 내용(예: 배경지식, 드라이버 비화)**이라고 판단되면 **Tool을 사용하고**, 일반적인 F1 정보(예: 엔진 규정)는 자체 지식으로 답변해.",
             height=150,
         )
     
@@ -147,25 +131,25 @@ if prompt := st.chat_input("DTS에 대해 무엇이든 물어보세요!"):
     # (2) AI 응답 생성 (Function Calling 루프 시작)
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
+        assistant_reply = "" # assistant_reply 변수 초기화
         
         # 1차 호출을 위한 메시지 구성
         messages_for_api = [
             {"role": "system", "content": system_prompt}
         ] + st.session_state.messages
         
-        # ⭐ 1차 호출: Tool 호출을 강제 (테스트 목적)
-        # 이 설정은 테스트가 성공하면 "auto"로 바꾸고 프롬프트를 강화할 수 있습니다.
+        # ⭐ 1차 호출: LLM이 Tool 호출을 할지 스스로 판단하게 함 (최적화)
         response = client.chat.completions.create(
             model="gpt-4o-mini", # <<<< ⭐ 배포명으로 수정 필수!
             messages=messages_for_api,
             tools=TOOLS,             
-            tool_choice={"type": "function", "function": {"name": "search_dts_knowledge"}}, 
+            tool_choice="auto", # ⭐ auto로 변경!
             temperature=temperature,
         )
 
         assistant_message = response.choices[0].message
         
-        # ⭐ Tool 호출이 필요한 경우 (우리가 강제했으므로 이 조건문이 True여야 함)
+        # ⭐ Tool 호출이 필요한 경우
         if assistant_message.tool_calls and len(assistant_message.tool_calls) > 0:
             # 챗봇이 생각하는 과정 보여주기
             message_placeholder.markdown("🧐 **DTS 문서**를 검색하고 있습니다... 🔍")
@@ -173,29 +157,25 @@ if prompt := st.chat_input("DTS에 대해 무엇이든 물어보세요!"):
             # Tool 호출 요청 처리 루프
             for tool_call in assistant_message.tool_calls:
                 function_name = tool_call.function.name
-                
                 if function_name in AVAILABLE_FUNCTIONS:
                     function_to_call = AVAILABLE_FUNCTIONS[function_name]
-                    # arguments가 JSON 문자열인지 확인 후 파싱
                     try:
                         function_args = json.loads(tool_call.function.arguments)
                     except json.JSONDecodeError:
                         st.error("오류: LLM이 반환한 함수 인수가 유효한 JSON이 아닙니다.")
                         continue
                         
-                    # 함수 실행 (DTS 문서 검색 더미 실행)
                     function_response = function_to_call(
                         query=function_args.get("query", "")
                     )
 
-                    # Tool 실행 요청과 결과를 messages_for_api에 추가
-                    messages_for_api.append(assistant_message) # 1차 응답 (Tool 요청)
+                    messages_for_api.append(assistant_message)
                     messages_for_api.append(
                         {
                             "tool_call_id": tool_call.id,
                             "role": "tool",
                             "name": function_name,
-                            "content": function_response, # 함수 실행 결과
+                            "content": function_response,
                         }
                     )
                 else:
@@ -203,26 +183,31 @@ if prompt := st.chat_input("DTS에 대해 무엇이든 물어보세요!"):
             
             # ⭐ 2차 호출: Tool 실행 결과를 LLM에게 전달하여 최종 답변 생성
             message_placeholder.markdown("✨ **DTS 문서 검색 완료!** 민수가 쉽게 이해할 수 있도록 답변을 정리하고 있어요... 🤖")
-
+            
             try:
-                # 2차 호출 시도
                 response = client.chat.completions.create(
-                    model="gpt-4o-mini", # <<<< ⭐ 배포명으로 수정 필수!
-                    messages=messages_for_api, # Tool 실행 결과가 추가된 메시지 전달
+                    model="gpt-4o-mini", 
+                    messages=messages_for_api, 
                     temperature=temperature,
                 )
-    
-                # 응답이 성공적으로 왔을 때
                 assistant_reply = response.choices[0].message.content
-    
             except Exception as e:
-                # API 호출 중 오류(Error)가 발생하면 이 부분이 실행됨
                 st.error(f"🚨 2차 API 호출 중 치명적인 오류 발생: {e}")
                 assistant_reply = f"죄송합니다. 서버 문제로 답변을 생성하지 못했습니다. (오류 코드: {str(e)[:50]}...)"
-    
-            # 최종 답변 화면에 출력 & 저장
+            
+            # 최종 답변을 Placeholder에 출력
             message_placeholder.markdown(assistant_reply)
-            st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
 
-
-
+        else:
+            # ⭐ Tool 호출이 필요 없는 일반 답변 (LLM 자체 지식 사용)
+            assistant_reply = assistant_message.content
+            
+            # UX 개선: 상태 메시지와 최종 답변을 합쳐서 Placeholder에 출력
+            final_output = (
+                "✅ **일반 정보:** DTS 문서 검색 없이 LLM의 자체 지식으로 답변합니다."
+                "\n\n" + assistant_reply
+            )
+            message_placeholder.markdown(final_output)
+            
+        # ⭐⭐⭐ 버그 수정: 최종 답변 저장 코드를 if/else 바깥에서 단 한 번 실행
+        st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
