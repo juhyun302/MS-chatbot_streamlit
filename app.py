@@ -91,76 +91,36 @@ for message in st.session_state.messages:
 
 # 사용자 입력 받기
 if prompt := st.chat_input("F1에 대해 무엇이든 물어보세요!"):
-    # (1) 사용자 메시지 화면에 표시 & 저장
+    # (1) 사용자 메시지 화면에 표시 & 저장 (기존과 동일)
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    # (2) AI 응답 생성 (Function Calling 루프 시작)
+
+    # (2) AI 응답 생성 시작
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # 1차 호출을 위한 메시지 구성
-        messages_for_api = [
-            {"role": "system", "content": system_prompt}
-        ] + st.session_state.messages
+        # ⭐ 1. LLM의 판단 없이, 코드 레벨에서 무조건 검색 함수 호출
+        #    사용자의 질문(prompt)을 검색 쿼리로 사용
+        message_placeholder.markdown("🧐 최신 F1 정보를 검색 중... 🔍")
+        function_response = search_web(query=prompt) # search_web 함수를 직접 호출
         
-        # ⭐ 1차 호출: LLM이 Tool 호출을 할지 판단
+        # ⭐ 2. 2차 호출을 위한 메시지 구성: 시스템 프롬프트 + 대화 기록 + 검색 결과
+        messages_for_api = [
+            {"role": "system", "content": system_prompt},
+            *st.session_state.messages, # 기존 사용자/AI 대화 기록 모두 포함
+            # 검색 결과를 LLM에게 직접 전달
+            {"role": "user", "content": f"검색 결과가 다음과 같습니다: '{function_response}' 이 검색 결과를 참고하여 사용자의 마지막 질문인 '{prompt}'에 답변하세요."}
+        ]
+
+        # ⭐ 3. 단 한 번만 API 호출하여 최종 답변 생성
+        message_placeholder.markdown("✨ 검색 완료! 답변을 정리하고 있어요... 🤖")
         response = client.chat.completions.create(
             model="gpt-4o-mini", # <<<< ⭐ 배포명으로 수정 필수!
-            messages=messages_for_api,
-            tools=TOOLS,             
-            tool_choice={"type": "function", "function": {"name": "search_web"}},    
+            messages=messages_for_api, # 검색 결과가 포함된 메시지 전달
             temperature=temperature,
         )
-
-        assistant_message = response.choices[0].message
-        
-        # ⭐ Tool 호출이 필요한 경우
-        if assistant_message.tool_calls:
-            # 챗봇이 생각하는 과정 보여주기
-            message_placeholder.markdown("🧐 **정보 부족!** 최신 F1 정보를 검색하고 있습니다... 🔍")
+        assistant_reply = response.choices[0].message.content
             
-            # Tool 호출 요청 처리 루프
-            for tool_call in assistant_message.tool_calls:
-                function_name = tool_call.function.name
-                
-                # 정의된 함수인지 확인하고 실행 준비
-                if function_name in AVAILABLE_FUNCTIONS:
-                    function_to_call = AVAILABLE_FUNCTIONS[function_name]
-                    function_args = json.loads(tool_call.function.arguments)
-                    
-                    # 함수 실행 (더미 웹 검색 실행)
-                    function_response = function_to_call(
-                        query=function_args.get("query", "")
-                    )
-
-                    # Tool 실행 요청과 결과를 messages_for_api에 추가
-                    messages_for_api.append(assistant_message) # 1차 응답 (Tool 요청)
-                    messages_for_api.append(
-                        {
-                            "tool_call_id": tool_call.id,
-                            "role": "tool",
-                            "name": function_name,
-                            "content": function_response, # 함수 실행 결과 (웹 검색 결과)
-                        }
-                    )
-                else:
-                    # 정의되지 않은 함수 호출 시 오류 처리
-                    st.error(f"오류: 알 수 없는 함수 호출 {function_name}")
-            
-            # ⭐ 2차 호출: Tool 실행 결과를 LLM에게 전달하여 최종 답변 생성
-            message_placeholder.markdown("✨ **검색 완료!** 최신 정보를 바탕으로 답변을 정리하고 있어요... 🤖")
-            response = client.chat.completions.create(
-                model="gpt-4o-mini", # <<<< ⭐ 배포명으로 수정 필수!
-                messages=messages_for_api, # Tool 실행 결과가 추가된 메시지 전달
-                temperature=temperature,
-            )
-            assistant_reply = response.choices[0].message.content
-            
-        else:
-            # Tool 호출이 필요 없는 일반 답변 (LLM 자체 지식)
-            assistant_reply = assistant_message.content
-
-        # 최종 답변 화면에 출력 & 저장
+        # 최종 답변 화면에 출력 & 저장 (기존과 동일)
         message_placeholder.markdown(assistant_reply)
         st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
