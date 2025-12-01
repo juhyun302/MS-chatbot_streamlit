@@ -47,7 +47,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "search_web",
-            "description": "최신 F1 정보, 레이스 결과, 드라이버 순위, 팀 뉴스 등 실시간 웹 검색이 필요할 때 사용합니다.",
+            "description": "최신 F1 정보, **특히 2024년 이후의 레이스 결과, 드라이버 이적 뉴스, 팀 순위 변동 등** 실시간 웹 검색이 필요할 때 **반드시** 사용해야 합니다.",
             "parameters": {
                 "type": "object",
                 "properties": {
